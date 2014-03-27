@@ -2,24 +2,39 @@
 
 import web
 import json
+from models import Stage
 
-urls = ('/(.*)', 'test')
+urls = (
+  '/test/(.*)', 'latest',
+  '/latest/(.*)', 'latest',
+  '/entries/(.*)', 'by_id',
+  '/report/(.*)', 'report'
+  )
+stages = []
 
-def not_found():
-    return json.dumps({'ok':0, 'errcode': 404})
-def found():
-    return json.dumps({'ok':1, 'messaage':'success'})
 
 app = web.application(urls, globals())
 
-class test:
+class by_id:
+  def GET(self, name):
+    result =  [x.dump() for x in stages if x.get_uuid() == name]
+    if len(result) < 1:
+      web.notfound()
+    else:
+      return result[0]
+class latest:
     def GET(self, name):
-        response =  found()
+      if len(stages) >= 1:
+        return stages[-1].dump()
+      else:
+        response = json.dumps({"in_pomodoro":False})
         return response
     def POST(self, message):
-        if message:
-          return message
-        else:
-          return not_found()
+      data = web.input()
+      stages.append(Stage(data.startTimeStamp, data.interval))
+class report:
+    def GET(self, message):
+        data = [x.get_data() for x in stages]
+        return json.dumps(data)
 if __name__ == "__main__":
   app.run()
