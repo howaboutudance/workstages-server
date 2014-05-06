@@ -22,6 +22,14 @@ class by_id:
       web.notfound()
     else:
       return result[0]
+  def DELETE(self, name):
+    try:
+     stage = [x for x in stages if x.get_uuid() == name][0]
+     stages.remove(stage)
+     stage.set_stop_status()
+     stages.append(stage)
+    except ValueError:
+      abort(404, "stage dosen't exist")
 class latest:
     def GET(self, name):
       if len(stages) >= 1:
@@ -31,7 +39,13 @@ class latest:
         return response
     def POST(self, message):
       data = web.input()
-      stages.append(Stage(data.startTimeStamp, data.interval))
+      q = [x for x in stages if x.get_current() == True]
+      if len(q) == 0:
+        print("q is 0")
+        stages.append(Stage(data.startTimeStamp, data.interval))
+      else:
+        web.notfound("please wait till "+q[0].get_endTimestamp().isoformat())
+      
 class report:
     def GET(self, message):
         data = [x.get_data() for x in stages]

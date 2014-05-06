@@ -61,8 +61,8 @@ def post_entry():
     q = [x for x in stages if x.get_current() == True]
     if len(q) == 0:
         current_stage = Stage(request.forms['startTimeStamp'], request.forms['interval'])
-    if 'type' in request.forms:
-        current_stage.set_type(request.forms['type'])
+        if 'type' in request.forms:
+          current_stage.set_type(request.forms['type'])
         write_to_stages(current_stage)
     else:
         abort(404, "stage already in progress")
