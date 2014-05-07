@@ -85,8 +85,7 @@ def get_stages():
 	return data
 @get('/dash')
 def get_dashboard():
-	data = get_stages()
-	tpl = template('simple_dashboard', rows=data)
+	tpl = template('simple_dashboard')
 	return tpl
 @route("/static/<filepath:path>")
 def get_css_static(filepath):
