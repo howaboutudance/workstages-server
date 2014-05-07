@@ -2,7 +2,7 @@
 #
 # simple server written in bottle, does the basic utilities of workstages.
 
-from bottle import run, request, abort, get, delete, post, Bottle
+from bottle import route, run, request, abort, get, delete, post, Bottle, template, static_file
 from models import Stage
 
 import json, shelve
@@ -62,9 +62,7 @@ def get_latest():
 def post_entry():
 	q = [x for x in stages if x.get_current() == True]
 	if len(q) == 0:
-		current_stage = Stage(request.forms['startTimeStamp'], request.forms['interval'])
-		if 'type' in request.forms:
-			current_stage.set_type(request.forms['type'])
+		current_stage = Stage(request.forms['startTimeStamp'], request.forms['interval'], stagetype=request.forms['type'])
 		write_to_stages(current_stage)
 	else:
 		abort(404, "stage already in progress")
@@ -79,10 +77,22 @@ def stop_stage():
 		write_to_stages(s)
 		
 @get('/report/')
+def report():
+	return json.dumps(get_stages())
 def get_stages():
 	# provides list of stages history
 	data = [x.get_data() for x in stages]
-	return json.dumps(data)
-
+	return data
+@get('/dash')
+def get_dashboard():
+	data = get_stages()
+	tpl = template('simple_dashboard', rows=data)
+	return tpl
+@route("/static/<filepath:path>")
+def get_css_static(filepath):
+	return static_file(filepath, root='/home/crimson/Downloads/develop/workstages/server/lib')
+@route("/lib/<filename>")
+def get_js_static(filename):
+	return static_file(filename, root='/home/crimson/Downloads/develop/workstages/lib')
 if __name__ == "__main__":
 	run(host="127.1.1.1", port="8080", debug=True, reloader=True)
