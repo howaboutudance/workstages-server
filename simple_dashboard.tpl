@@ -5,34 +5,43 @@
     	<meta http-equiv="X-UA-Compatible" content="IE=edge">
     	<meta name="viewport" content="width=device-width, initial-scale=1">
     	<link href="static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    	<title>Workstages Dashboard</title>
     </head>
     <body>
     	
     	<header class="navbar navbar-inverse navbar-fixed-top">
-        	<h1> WorkStages Dashboard </h1>
-        </header>
-        <section class="row">
-	        <aside class=" col-sm-3 col-md-3 sidebar">
-	        	<ul class="nav nav-sidebar">
+    		<div class="navbar-left">
+        		<h1> WorkStages Dashboard </h1>
+        	</div>
+        	<button class="navbar-btn btn btn-default navbar-right">
+        		Sign in
+        	</button>
+        	<ul class="side-nav">
 	        		<li>General</li>
 	        	</ul>
-	        </aside>
+        </header>
+        <aside class=" col-sm-3 col-md-3 sidebar-wrapper">
+	        	
+	    </aside>
+        <section class="row">
+	        
 	        <section class="panel" id="stages">
 		       	<h2 class="panel-heading">Stages</h2>
 		        <article id="stages_list" class="panel-body">
-		        	<table class="table">
+		        	<table class="table table-striped">
 		        		<thead>
 			        		<tr>
-			        			<th>id</th>
-			        			<th>type</th>
+			        			<th>time started</th>
 			        			<th>interval</th>
+			        			<th>type</th>
 			        		</tr>
 		        		</thead>
-		        		<tbody>
+		        		<tbody class="main_data">
 			        		<tr id="stages_template">
-			        			<td class="id"></td>
-			        			<td class="type"></td>
+			        			<td class="time_started"></td>
 			        			<td class="interval"></td>
+			        			<td class="type"></td>
+			        			<td><button class='btn btn-default'><span class="glyphicon glyphicon-remove"></span></button></td>
 			        		</tr>
 		        		</tbody>
 		        	</table>
@@ -56,9 +65,53 @@
         <script src="lib/jquery-2.0.3.js"></script>
         <script src="static/bootstrap/js/bootstrap.min.js"></script>
         <script>
+        function addDeleteAction(id){
+        	$("#"+id+" button").click(function(){
+        							$.ajax({
+	        							type:"DELETE",
+	        							url:"entries/"+id,
+	        							data: id,
+	        							success: function(data){
+	        								$("#"+id).css("visibility","hidden");
+	        								$("#"+id).css("display","none")
+	        							}
+        							});
+        						});
+        };
+        function refreshlist() {
+        	$.getJSON (
+        			"report/10",
+        			function(data){
+        				
+        				
+        				for(var i=0; i < data.length; i++) {
+        					var row_template = $("#stages_template").clone();
+        					var rowdata = data[i];
+        					var new_id = rowdata['stage_id']
+        					row_template.attr("id",new_id)
+        					row_template.children(".time_started").text(new Date(rowdata['start_time']));
+        					row_template.children(".type").text(rowdata['type']);
+        					row_template.children(".interval").text(rowdata['interval']);
+        					row_template.insertBefore("#stages_template");
+        					addDeleteAction(new_id);
+        					
+        				}
+        				$('#stages_template').css("visibility","hidden")
+        			});
+        	};
         	$(document).ready(function() {
-        		$.ajax ()
-        		$("#stages_worked").text("temp_value");
+        		$.getJSON (
+        			"summary",
+        			function(data){
+        				var time_worked = 0;
+        				var total_stages = 0;
+        				time_worked = data['hours_worked']
+        				total_stages = data['total_stages']
+        				$("#stages_total").text(total_stages);
+        				$('#stages_worked').text(time_worked/60);
+        			})
+        		refreshlist();
+        		
         	});
         </script>
     </body>
