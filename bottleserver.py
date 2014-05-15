@@ -7,18 +7,23 @@ from models import Stage
 
 import json, shelve
 
+#constants
+SERVER_ADDRESS = "127.1.1.1"
+SERVER_PORT = "8080"
+DEBUG = True
+RELOADER = True
 # create bottle app
 app = Bottle()
 
 # opens shelve that will be used for data persistence
-d = shelve.open("./data", writeback=True)
+shelvedata = shelve.open("./data", writeback=True)
 try:
-	stages = d["stages"]
+	stages = shelvedata["stages"]
 	
 # if keyerror will open new list in data file named "stages"
 except KeyError:
-	d["stages"] = []
-	stages = d["stages"]
+	shelvedata["stages"] = []
+	stages = shelvedata["stages"]
 
 # Helper Functions
 
@@ -26,7 +31,8 @@ def write_to_stages(stage):
 	# add stage to local datastore and syncs with shelve
 	
 	stages.append(stage)
-	d.sync()
+	shelvedata.sync()
+	
 
 def get_stages(limit, start=0):
 	# provides list of stages history
@@ -121,4 +127,4 @@ def get_js_static(filename):
 
 
 if __name__ == "__main__":
-	run(host="127.1.1.1", port="8080", debug=True, reloader=True)
+	run(host=SERVER_ADDRESS , port=SERVER_PORT, debug=DEBUG, reloader=RELOADER)
