@@ -105,10 +105,13 @@
         			function(data){
         				var time_worked = 0;
         				var total_stages = 0;
+        				var time_break = 0
         				time_worked = data['hours_worked']
         				total_stages = data['total_stages']
+        				time_break = data['hours_break']
         				$("#stages_total").text(total_stages);
-        				$('#stages_worked').text(time_worked/60);
+        				$('#stages_worked').text(Math.round(time_worked/60,4));
+        				$("#stages_break").text(Math.round(time_break/60, 4));
         			})
         		refreshlist();
         		
