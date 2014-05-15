@@ -83,6 +83,7 @@ def post_entry():
 @delete("/latest/")
 def stop_stage():
 	#used to stop stage, queries datastore via list comprhension if found removes via remove method of datastore
+	
 	q = [x for x in stages if x.get_current == True]
 	if len(q) != 0:
 		for s in q:
