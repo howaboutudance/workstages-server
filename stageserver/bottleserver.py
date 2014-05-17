@@ -3,28 +3,27 @@
 # simple server written in bottle, does the basic utilities of workstages.
 
 from bottle import route, run, request, abort, get, delete, post, Bottle, template, static_file
-from models import Stage
+from stageserver.models import Stage
+from stageserver import serverconfig
 
 import json, shelve
 
-#constants
-SERVER_ADDRESS = "127.1.1.1"
-SERVER_PORT = "8080"
-DEBUG = True
-RELOADER = True
+
+
 # create bottle app
 app = Bottle()
 
 # opens shelve that will be used for data persistence
 shelvedata = shelve.open("./data", writeback=True)
+
+# if keyerror will open new list in data file named "stages"
 try:
 	stages = shelvedata["stages"]
-	
-# if keyerror will open new list in data file named "stages"
+
 except KeyError:
 	shelvedata["stages"] = []
 	stages = shelvedata["stages"]
-
+	
 # Helper Functions
 
 def write_to_stages(stage):
@@ -32,6 +31,7 @@ def write_to_stages(stage):
 	
 	stages.append(stage)
 	shelvedata.sync()
+	shelvedata["stages"] = stages
 	
 
 def get_stages(limit, start=0):
@@ -119,12 +119,12 @@ def get_dashboard():
 # Static routes
 @route("/static/<filepath:path>")
 def get_css_static(filepath):
-	return static_file(filepath, root='/home/crimson/Downloads/develop/workstages/server/lib')
+	return static_file(filepath, root=serverconfig.STATIC_FILE_PATH)
 
 @route("/lib/<filename>")
 def get_js_static(filename):
-	return static_file(filename, root='/home/crimson/Downloads/develop/workstages/lib')
+	return static_file(filename, root=serverconfig.LIB_FILE_PATH)
 
 
 if __name__ == "__main__":
-	run(host=SERVER_ADDRESS , port=SERVER_PORT, debug=DEBUG, reloader=RELOADER)
+	run(host=serverconfig.SERVER_ADDRESS , port=serverconfig.SERVER_PORT, debug=serverconfig.DEBUG, reloader=serverconfig.RELOADER)
