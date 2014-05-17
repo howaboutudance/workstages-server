@@ -1,4 +1,4 @@
-# (c) Michael Penhallegon relased under GPL v3
+# (c) Michael Penhallegon released under GPL v3
 #
 # simple server written in bottle, does the basic utilities of workstages.
 
@@ -7,8 +7,6 @@ from stageserver.models import Stage
 from stageserver import serverconfig
 
 import json, shelve
-
-
 
 # create bottle app
 app = Bottle()
