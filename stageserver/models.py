@@ -16,7 +16,7 @@ class db_Stage(base):
 	end_time = Column(DateTime())
 	interval = Column(Float())
 	
-engine = create_engine('sqllite://stages.db')
+engine = create_engine('sqlite:///stages.db')
 class Stage():
   def __init__(self, starttime, interval, stagetype="work"):
     self.stopped = False
