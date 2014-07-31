@@ -1,15 +1,11 @@
-# (c) Michael Penhallegon relased under GPL v3
+# (c) Michael Penhallegon released under GPL v3
 #
 # simple server written in bottle, does the basic utilities of workstages.
 
 from bottle import request, abort, get, delete, post, Bottle, template 
 from models import Stage
-
 import json 
 
-#constants
-DEBUG = True
-RELOADER = True
 # create bottle app
 app = Bottle()
 
@@ -104,4 +100,3 @@ def summary():
 def get_dashboard():
 	tpl = template('templates/simple_dashboard')
 	return tpl
-
