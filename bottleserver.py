@@ -2,37 +2,26 @@
 #
 # simple server written in bottle, does the basic utilities of workstages.
 
-from bottle import route, run, request, abort, get, delete, post, Bottle, template, static_file
+from bottle import request, abort, get, delete, post, Bottle, template 
 from models import Stage
 
-import json, shelve
+import json 
 
 #constants
-SERVER_ADDRESS = "127.1.1.1"
-SERVER_PORT = "8080"
 DEBUG = True
 RELOADER = True
 # create bottle app
 app = Bottle()
 
 # opens shelve that will be used for data persistence
-shelvedata = shelve.open("./data", writeback=True)
-try:
-	stages = shelvedata["stages"]
+stages = []
 	
-# if keyerror will open new list in data file named "stages"
-except KeyError:
-	shelvedata["stages"] = []
-	stages = shelvedata["stages"]
-
 # Helper Functions
 
 def write_to_stages(stage):
 	# add stage to local datastore and syncs with shelve
 	
 	stages.append(stage)
-	shelvedata.sync()
-	
 
 def get_stages(limit, start=0):
 	# provides list of stages history
@@ -43,7 +32,7 @@ def get_stages(limit, start=0):
 
 # Routes
 
-@get('/entries/<name>')
+@app.get('/entries/<name>')
 def get_by_id(name):
 	#used to get stages by uuid
 	
@@ -53,7 +42,7 @@ def get_by_id(name):
 	else:
 		return result[0]
 	
-@delete('/entries/<name>')
+@app.delete('/entries/<name>')
 def delete_by_id(name):
 	# used to delete stage if not available will return a 404
 	
@@ -64,7 +53,7 @@ def delete_by_id(name):
 	except ValueError:
 		abort(404, "stage dosen't exist")
 		
-@get('/latest/')
+@app.get('/latest/')
 def get_latest():
 	# return status of current stage and the data from that stage 
 	
@@ -73,7 +62,7 @@ def get_latest():
 	else:
 		return {"in_pomodoro":False, "success":False }
 	
-@post('/latest/')
+@app.post('/latest/')
 def post_entry():
 	# constructor to add a stage, checkes datastore via list comprhension for a currently running
 	# stage, and if not found, create new stage object and send to be added to datastore, if currently
@@ -86,7 +75,7 @@ def post_entry():
 	else:
 		abort(404, "stage already in progress")
 		
-@delete("/latest/")
+@app.delete("/latest/")
 def stop_stage():
 	#used to stop stage, queries datastore via list comprhension if found removes via remove method of datastore
 	
@@ -97,12 +86,12 @@ def stop_stage():
 		s.set_stop_status()
 		write_to_stages(s)
 		
-@get('/report/<limit:int>')
+@app.get('/report/<limit:int>')
 def report(limit=100):
 	# contructor for report returns data from datastore via get_stages function
 	return json.dumps(get_stages(limit))
 
-@get('/summary')
+@app.get('/summary')
 def summary():
 	# computes statistics about stages and returns them
 	total_stages = len(stages)
@@ -111,20 +100,8 @@ def summary():
 	return json.dumps({"hours_worked":work_sum, "total_stages":total_stages, "hours_break":break_sum})
 
 # Dashboard
-@get('/dash')
+@app.get('/dash')
 def get_dashboard():
-	tpl = template('simple_dashboard')
+	tpl = template('templates/simple_dashboard')
 	return tpl
 
-# Static routes
-@route("/static/<filepath:path>")
-def get_css_static(filepath):
-	return static_file(filepath, root='/home/crimson/Downloads/develop/workstages/server/lib')
-
-@route("/lib/<filename>")
-def get_js_static(filename):
-	return static_file(filename, root='/home/crimson/Downloads/develop/workstages/lib')
-
-
-if __name__ == "__main__":
-	run(host=SERVER_ADDRESS , port=SERVER_PORT, debug=DEBUG, reloader=RELOADER)

@@ -62,7 +62,7 @@
         	<sub>&copy; Michael Penhallegon all rights reserved.</sub>
         </footer>
         <!-- jQuery  required -->
-        <script src="lib/jquery-2.0.3.js"></script>
+        <script src="static/js/jquery-2.1.1.min.js"></script>
         <script src="static/bootstrap/js/bootstrap.min.js"></script>
         <script>
         function addDeleteAction(id){
