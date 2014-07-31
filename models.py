@@ -13,6 +13,8 @@ class Stage:
       self.is_break = True
     else:
       self.is_break = False
+	def set_user_id(uid):
+		self.user_id == uid
   def set_stop_status(self):
     self.stopped = True
   def get_stop_status(self):
