@@ -7,7 +7,7 @@ import bottleserver
 
 class latest_url(unittest.TestCase):
   def setUp(self):
-    self.app = TestApp(bottleserver.app)
+    self.app = TestApp(stageserver.bottleserver.app)
     self.timestamp = time.mktime(datetime.now().timetuple())
   def test_post_request(self):
     response = self.app.post('/latest/', {"interval":0.25, "startTimeStamp":int(self.timestamp)})

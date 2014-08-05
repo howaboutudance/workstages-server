@@ -2,8 +2,22 @@
 
 import uuid, time, json
 from datetime import datetime, timedelta
+from sqlalchemy import Column, ForeignKey, Integer, String, CHAR, DateTime, Float
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import create_engine
+from sqlalchemy.orm import relationship
 
-class Stage:
+base = declarative_base()
+
+class db_Stage(base):
+	__tablename__ = 'stages'
+	stage_id = Column(CHAR(32), primary_key=True)
+	start_time = Column(DateTime())
+	end_time = Column(DateTime())
+	interval = Column(Float())
+	
+engine = create_engine('sqlite:///stages.db')
+class Stage():
   def __init__(self, starttime, interval, stagetype="work"):
     self.stopped = False
     self.uuid = uuid.uuid4()
@@ -13,6 +27,8 @@ class Stage:
       self.is_break = True
     else:
       self.is_break = False
+	def set_user_id(uid):
+		self.user_id == uid
   def set_stop_status(self):
     self.stopped = True
   def get_stop_status(self):
