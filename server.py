@@ -3,7 +3,7 @@
 # simple server written in bottle, does the basic utilities of workstages.
 
 from bottle import request, abort, get, delete, post, Bottle, template 
-from models import Stage
+from stageserver.models import Stage
 import json 
 
 # create bottle app
