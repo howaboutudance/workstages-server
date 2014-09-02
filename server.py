@@ -19,7 +19,7 @@ stages = []
 def get_by_id(name):
 	#used to get stages by uuid
 	
-	result =  [x.dump() for x in stages if x.get_uuid() == name]
+	result =  [contl.dump(x) for x in contl.get_stages(1000) if x.uuid() == name]
 	if len(result) < 1:
 		abort(404, "stage dosen't exist")
 	else:
@@ -30,9 +30,8 @@ def delete_by_id(name):
 	# used to delete stage if not available will return a 404
 	
 	try:
-		stage = [x for x in stages if x.get_uuid() == name][0]
-		stages.remove(stage)
-		stage.set_stop_status()
+		stage = [x for x in contl.get_stages(1000) if x.uuid == name][0]
+		stage.key.delete()
 	except ValueError:
 		abort(404, "stage dosen't exist")
 		
@@ -41,7 +40,7 @@ def get_latest():
 	# return status of current stage and the data from that stage
 	
 	if contl.in_stage() == True:
-		return contl.get_last()
+		return contl.dump(contl.get_last())
 	else:
 		return {"in_pomodoro":False, "success":False }
 	
@@ -60,7 +59,7 @@ def stop_stage():
 	if contl.in_stage() == True:
 		s = contl.get_last()
 		s.stopped = True;
-		contl.write_stage(s)
+		s.put()
 		
 @app.get('/report/<limit:int>')
 def report(limit=100):
@@ -70,9 +69,9 @@ def report(limit=100):
 @app.get('/summary')
 def summary():
 	# computes statistics about stages and returns them
-	total_stages = len(stages)
-	work_sum = sum([x.get_interval() for x in stages if x.get_type() == 'work'])
-	break_sum = sum([x.get_interval() for x in stages if x.get_type() == 'break'])
+	total_stages = len(contl.get_stages(1000))
+	work_sum = sum([x.interval for x in contl.get_stages(1000) if x.worktype == True])
+	break_sum = sum([x.interval for x in contl.get_stages(1000) if x.worktype == False])
 	return json.dumps({"hours_worked":work_sum, "total_stages":total_stages, "hours_break":break_sum})
 
 # Dashboard
