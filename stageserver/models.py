@@ -17,13 +17,6 @@ class StageObj(ndb.Model):
     def query_user(cls, ancestor_key):
         #used to get all stage by user id
         return cls.query(ancestor=ancestor_key).order(-cls.starttime)
-    def get_latest(cls):
-        #return the most recent stage will include additional
-        # Addtiional data if currently am in stage
-        pass
-    def query_by_id(cls):
-        # return stage that has a certain uuid
-        pass
 
 class Stage():
   def __init__(self, starttime, interval, stagetype="work"):
@@ -63,17 +56,4 @@ class Stage():
       return True
     else:
       return False
-  def get_data(self):
-    data_dict = {
-      "stage_id": self.get_uuid(),
-      "end_time": self.get_endTime(),
-      "start_time":self.get_startTime(),
-      "interval":self.get_interval(),
-      "type": self.get_type(),
-      "stopped":self.get_stop_status()
-      }
-    return data_dict
-  def dump(self):
-    props = self.get_data()
-    newdata = {"current":self.get_current(), "properties": props}
-    return json.dumps(newdata)
+  

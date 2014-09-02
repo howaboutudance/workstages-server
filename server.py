@@ -3,46 +3,16 @@
 # simple server written in bottle, does the basic utilities of workstages.
 
 from bottle import request, abort, get, delete, post, Bottle, template, debug
-from stageserver.models import Stage, StageObj
-from google.appengine.ext import ndb
+from stageserver.controllers import StageContrl
 import json, uuid, datetime
 
 # create bottle app
 debug(mode=True)
 app = Bottle()
-
+contl = StageContrl()
 # opens shelve that will be used for data persistence
 stages = []
-	
-# Helper Functions
 
-def write_to_stages(request):
-	# add stage to local datastore and syncs with shelve
-    user_name = "mpenhall"
-    stagetype = 0
-    if request.get("type") == "work":
-        stagetype = 1
-    newstage = StageObj(
-        parent=ndb.Key("User","mpenhall"),
-        starttime=datetime.datetime.fromtimestamp(int(request.get('startTimeStamp'))/1000.0),
-        interval=int(request.get('interval'))/60,
-        worktype=bool(stagetype),
-        uuid = str(uuid.uuid4()))
-    newstage.put()
-def get_stages(limit, start=0):
-	# provides list of stages history
-    user_name = "mpenhall"
-    ancestor_key = ndb.Key("User", user_name or "*nouser*")
-    return StageObj.query_user(ancestor_key).fetch(limit)
-def get_last():
-	return get_stages(1)[0]
-def in_stage():
-	lateststage = get_last()
-	endofstage = lateststage.starttime + datetime.timedelta(minutes=lateststage.interval)
-	if endofstage <= datetime.datetime.now():
-		return False
-	else:
-		return True
 # Routes
 
 @app.get('/entries/<name>')
@@ -70,8 +40,8 @@ def delete_by_id(name):
 def get_latest():
 	# return status of current stage and the data from that stage
 	
-	if in_stage() == True:
-		return get_last()
+	if contl.in_stage() == True:
+		return contl.get_last()
 	else:
 		return {"in_pomodoro":False, "success":False }
 	
@@ -81,23 +51,21 @@ def post_entry():
 	# stage, and if not found, create new stage object and send to be added to datastore, if currently
 	# in stage returns a 404
 	
-		write_to_stages(request.forms)
+	return contl.write_stage(request.forms)
 		
 @app.delete("/latest/")
 def stop_stage():
 	#used to stop stage, queries datastore via list comprhension if found removes via remove method of datastore
 	
-	q = [x for x in stages if x.get_current == True]
-	if len(q) != 0:
-		for s in q:
-			stages.remove(s)
-		s.set_stop_status()
-		write_to_stages(s)
+	if contl.in_stage() == True:
+		s = contl.get_last()
+		s.stopped = True;
+		contl.write_stage(s)
 		
 @app.get('/report/<limit:int>')
 def report(limit=100):
 	# contructor for report returns data from datastore via get_stages function
-	return json.dumps(get_stages(limit))
+	return json.dumps([contl.get_data(x) for x in contl.get_stages(limit)])
 
 @app.get('/summary')
 def summary():
@@ -109,6 +77,7 @@ def summary():
 
 # Dashboard
 @app.get('/dash')
+@app.get('/')
 def get_dashboard():
 	tpl = template('templates/simple_dashboard')
 	return tpl
