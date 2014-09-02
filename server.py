@@ -34,7 +34,15 @@ def get_stages(limit, start=0):
     user_name = "mpenhall"
     ancestor_key = ndb.Key("User", user_name or "*nouser*")
     return StageObj.query_user(ancestor_key).fetch(limit)
-
+def get_last():
+	return get_stages(1)[0]
+def in_stage():
+	lateststage = get_last()
+	endofstage = lateststage.starttime + datetime.timedelta(minutes=lateststage.interval)
+	if endofstage <= datetime.datetime.now():
+		return False
+	else:
+		return True
 # Routes
 
 @app.get('/entries/<name>')
@@ -62,8 +70,8 @@ def delete_by_id(name):
 def get_latest():
 	# return status of current stage and the data from that stage
 	
-	if len(stages) >= 1:
-		return stages[-1].dump()
+	if in_stage() == True:
+		return get_last()
 	else:
 		return {"in_pomodoro":False, "success":False }
 	
