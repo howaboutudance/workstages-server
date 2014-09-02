@@ -66,17 +66,18 @@
         <script src="static/bootstrap/js/bootstrap.min.js"></script>
         <script>
         function addDeleteAction(id){
+                var delete_url = "/entries/"+id;
         	$("#"+id+" button").click(function(){
-        							$.ajax({
-	        							type:"DELETE",
-	        							url:"entries/"+id,
-	        							data: id,
-	        							success: function(data){
-	        								$("#"+id).css("visibility","hidden");
-	        								$("#"+id).css("display","none")
-	        							}
-        							});
-        						});
+                                                $.ajax({
+                                                        type:"DELETE",
+                                                        url:delete_url,
+                                                        })
+                                                .done(function(data){
+                                                                $("#"+id).css("visibility","hidden");
+                                                                $("#"+id).css("display","none")
+                                                        
+                                                        });
+                                                });
         };
         function refreshlist() {
         	$.getJSON (
