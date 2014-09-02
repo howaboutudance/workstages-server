@@ -2,11 +2,13 @@
 #
 # simple server written in bottle, does the basic utilities of workstages.
 
-from bottle import request, abort, get, delete, post, Bottle, template 
-from stageserver.models import Stage
-import json 
+from bottle import request, abort, get, delete, post, Bottle, template, debug
+from stageserver.models import Stage, StageObj
+from google.appengine.ext import ndb
+import json, uuid, datetime
 
 # create bottle app
+debug(mode=True)
 app = Bottle()
 
 # opens shelve that will be used for data persistence
@@ -14,17 +16,24 @@ stages = []
 	
 # Helper Functions
 
-def write_to_stages(stage):
+def write_to_stages(request):
 	# add stage to local datastore and syncs with shelve
-	
-	stages.append(stage)
-
+    user_name = "mpenhall"
+    stagetype = 0
+    if request.get("type") == "work":
+        stagetype = 1
+    newstage = StageObj(
+        parent=ndb.Key("User","mpenhall"),
+        starttime=datetime.datetime.fromtimestamp(int(request.get('startTimeStamp'))/1000.0),
+        interval=int(request.get('interval'))/60,
+        worktype=bool(stagetype),
+        uuid = str(uuid.uuid4()))
+    newstage.put()
 def get_stages(limit, start=0):
 	# provides list of stages history
-	data = [x.get_data() for x in stages]
-	if len(data) >= limit:
-		data = data[start:limit]
-	return data
+    user_name = "mpenhall"
+    ancestor_key = ndb.Key("User", user_name or "*nouser*")
+    return StageObj.query_user(ancestor_key).fetch(limit)
 
 # Routes
 
@@ -51,7 +60,7 @@ def delete_by_id(name):
 		
 @app.get('/latest/')
 def get_latest():
-	# return status of current stage and the data from that stage 
+	# return status of current stage and the data from that stage
 	
 	if len(stages) >= 1:
 		return stages[-1].dump()
@@ -64,12 +73,7 @@ def post_entry():
 	# stage, and if not found, create new stage object and send to be added to datastore, if currently
 	# in stage returns a 404
 	
-	q = [x for x in stages if x.get_current() == True]
-	if len(q) == 0:
-		current_stage = Stage(request.forms['startTimeStamp'], request.forms['interval'], stagetype=request.forms['type'])
-		write_to_stages(current_stage)
-	else:
-		abort(404, "stage already in progress")
+		write_to_stages(request.forms)
 		
 @app.delete("/latest/")
 def stop_stage():

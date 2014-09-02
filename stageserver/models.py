@@ -2,7 +2,26 @@
 
 import uuid, time, json
 from datetime import datetime, timedelta
+from google.appengine.ext import ndb
 
+
+class StageObj(ndb.Model):
+    uuid = ndb.StringProperty()
+    stopped = ndb.BooleanProperty()
+    starttime = ndb.DateTimeProperty()
+    interval = ndb.IntegerProperty()
+    worktype = ndb.BooleanProperty()
+    @classmethod
+    def query_user(cls, ancestor_key):
+        #used to get all stage by user id
+        pass
+    def get_latest(cls):
+        #return the most recent stage will include additional
+        # Addtiional data if currently am in stage
+        pass
+    def query_by_id(cls):
+        # return stage that has a certain uuid    
+        pass
 
 class Stage():
   def __init__(self, starttime, interval, stagetype="work"):
