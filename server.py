@@ -46,16 +46,16 @@ def get_latest():
 	
 @app.post('/latest/')
 def post_entry():
-	# constructor to add a stage, checkes datastore via list comprhension for a currently running
-	# stage, and if not found, create new stage object and send to be added to datastore, if currently
-	# in stage returns a 404
+# constructor to add a stage, checkes datastore via list comprhension for a currently running
+# stage, and if not found, create new stage object and send to be added to datastore, if currently
+# in stage returns a 404
 	
 	return contl.write_stage(request.forms)
 		
 @app.delete("/latest/")
 def stop_stage():
-	#used to stop stage, queries datastore via list comprhension if found removes via remove method of datastore
-	
+#used to stop stage, queries datastore via list comprhension if found removes via remove method of datastore
+    
 	if contl.in_stage() == True:
 		s = contl.get_last()
 		s.stopped = True;
@@ -63,12 +63,12 @@ def stop_stage():
 		
 @app.get('/report/<limit:int>')
 def report(limit=100):
-	# contructor for report returns data from datastore via get_stages function
+# contructor for report returns data from datastore via get_stages function
 	return json.dumps([contl.get_data(x) for x in contl.get_stages(limit)])
 
 @app.get('/summary')
 def summary():
-	# computes statistics about stages and returns them
+# computes statistics about stages and returns them
 	total_stages = len(contl.get_stages(1000))
 	work_sum = sum([x.interval for x in contl.get_stages(1000) if x.worktype == True])
 	break_sum = sum([x.interval for x in contl.get_stages(1000) if x.worktype == False])
@@ -80,3 +80,9 @@ def summary():
 def get_dashboard():
 	tpl = template('templates/simple_dashboard')
 	return tpl
+
+#'Click'
+@app.get('/click')
+def get_click():
+    tpl = template('templates/click')
+    return tpl

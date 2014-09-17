@@ -4,6 +4,9 @@ import uuid, time, json
 from datetime import datetime, timedelta
 from google.appengine.ext import ndb
 
+class Client(ndb.Model):
+	uuid = ndb.StringProperty()
+	
 class User(ndb.Model):
 	name = ndb.StringProperty()
 	

@@ -5,7 +5,7 @@ from datetime import timedelta, datetime
 
 class StageContrl():
 	def write_stage(self, request):
-		# add stage to local datastore and syncs with shelve
+            # add stage to local datastore and syncs with shelve
 	    user_name = "mpenhall"
 	    stagetype = 0
 	    if request.get("type") == "work":
@@ -20,14 +20,17 @@ class StageContrl():
 	    newstage.put()
 	    return "{'status':'sucess'}"
 	def get_stages(self, limit, start=0):
-		# provides list of stages history
+            # provides list of stages history
 	    user_name = "mpenhall"
 	    ancestor_key = ndb.Key("User", user_name or "*nouser*")
 	    return StageObj.query_user(ancestor_key).fetch(limit)
 	def get_last(self):
 		return self.get_stages(1)[0]
 	def in_stage(self):
-		lateststage = self.get_last()
+                try:
+		    lateststage = self.get_last()
+                except IndexError:
+                    return False
 		endofstage = lateststage.starttime + timedelta(minutes=lateststage.interval)
 		if endofstage <= datetime.now():
 			return False
